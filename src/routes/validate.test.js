@@ -41,32 +41,25 @@ describe('#validate route', () => {
     })
   })
 
-  test('Should return 200 with the fixed stub identity when the authorization header is missing', async () => {
-    const { statusCode, result } = await server.inject({
-      method: 'POST',
-      url: '/validate'
-    })
+  test.each([
+    ['is missing', undefined],
+    ['has no Bearer prefix', 'read-token']
+  ])(
+    'Should return 200 with the fixed stub identity when the authorization header %s',
+    async (_description, authorization) => {
+      const { statusCode, result } = await server.inject({
+        method: 'POST',
+        url: '/validate',
+        headers: authorization ? { authorization } : {}
+      })
 
-    expect(statusCode).toBe(200)
-    expect(result).toEqual({
-      actorId: 'local-stub',
-      permissions: ['reference-data.read', 'reference-data.write']
-    })
-  })
-
-  test('Should return 200 with the fixed stub identity when the authorization header has no Bearer prefix', async () => {
-    const { statusCode, result } = await server.inject({
-      method: 'POST',
-      url: '/validate',
-      headers: { authorization: 'read-token' }
-    })
-
-    expect(statusCode).toBe(200)
-    expect(result).toEqual({
-      actorId: 'local-stub',
-      permissions: ['reference-data.read', 'reference-data.write']
-    })
-  })
+      expect(statusCode).toBe(200)
+      expect(result).toEqual({
+        actorId: 'local-stub',
+        permissions: ['reference-data.read', 'reference-data.write']
+      })
+    }
+  )
 
   test('Should echo x-cdp-request-id back as a response header when supplied', async () => {
     const { headers } = await server.inject({
