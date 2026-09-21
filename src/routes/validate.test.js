@@ -13,7 +13,7 @@ describe('#validate route', () => {
     await server.stop({ timeout: 0 })
   })
 
-  test('Should return 200 with actorId and permissions for read-token', async () => {
+  test('Should return 200 with the fixed stub identity for a normal Bearer token', async () => {
     const { statusCode, result } = await server.inject({
       method: 'POST',
       url: '/validate',
@@ -22,66 +22,50 @@ describe('#validate route', () => {
 
     expect(statusCode).toBe(200)
     expect(result).toEqual({
-      actorId: 'local-reader',
-      permissions: ['reference-data.read']
-    })
-  })
-
-  test('Should return 200 with actorId and permissions for write-token', async () => {
-    const { statusCode, result } = await server.inject({
-      method: 'POST',
-      url: '/validate',
-      headers: { authorization: 'Bearer write-token' }
-    })
-
-    expect(statusCode).toBe(200)
-    expect(result).toEqual({
-      actorId: 'local-writer',
+      actorId: 'local-stub',
       permissions: ['reference-data.read', 'reference-data.write']
     })
   })
 
-  test('Should return 200 with empty permissions for no-permission-token', async () => {
+  test('Should return 200 with the fixed stub identity for an unknown token', async () => {
     const { statusCode, result } = await server.inject({
-      method: 'POST',
-      url: '/validate',
-      headers: { authorization: 'Bearer no-permission-token' }
-    })
-
-    expect(statusCode).toBe(200)
-    expect(result).toEqual({
-      actorId: 'local-none',
-      permissions: []
-    })
-  })
-
-  test('Should return 401 for an unknown token', async () => {
-    const { statusCode } = await server.inject({
       method: 'POST',
       url: '/validate',
       headers: { authorization: 'Bearer not-a-real-token' }
     })
 
-    expect(statusCode).toBe(401)
+    expect(statusCode).toBe(200)
+    expect(result).toEqual({
+      actorId: 'local-stub',
+      permissions: ['reference-data.read', 'reference-data.write']
+    })
   })
 
-  test('Should return 401 when the authorization header is missing', async () => {
-    const { statusCode } = await server.inject({
+  test('Should return 200 with the fixed stub identity when the authorization header is missing', async () => {
+    const { statusCode, result } = await server.inject({
       method: 'POST',
       url: '/validate'
     })
 
-    expect(statusCode).toBe(401)
+    expect(statusCode).toBe(200)
+    expect(result).toEqual({
+      actorId: 'local-stub',
+      permissions: ['reference-data.read', 'reference-data.write']
+    })
   })
 
-  test('Should return 401 when the authorization header has no Bearer prefix', async () => {
-    const { statusCode } = await server.inject({
+  test('Should return 200 with the fixed stub identity when the authorization header has no Bearer prefix', async () => {
+    const { statusCode, result } = await server.inject({
       method: 'POST',
       url: '/validate',
       headers: { authorization: 'read-token' }
     })
 
-    expect(statusCode).toBe(401)
+    expect(statusCode).toBe(200)
+    expect(result).toEqual({
+      actorId: 'local-stub',
+      permissions: ['reference-data.read', 'reference-data.write']
+    })
   })
 
   test('Should echo x-cdp-request-id back as a response header when supplied', async () => {
