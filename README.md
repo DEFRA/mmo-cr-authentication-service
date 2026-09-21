@@ -15,7 +15,6 @@ Core delivery platform Node.js Backend Template.
     - [Windows prettier issue](#windows-prettier-issue)
 - [API endpoints](#api-endpoints)
 - [Development helpers](#development-helpers)
-  - [MongoDB Locks](#mongodb-locks)
   - [Proxy](#proxy)
 - [Docker](#docker)
   - [Development image](#development-image)
@@ -114,56 +113,28 @@ git config --global core.autocrlf false
 
 ## API endpoints
 
-| Endpoint             | Description                    |
-| :------------------- | :----------------------------- |
-| `GET: /health`       | Health                         |
-| `GET: /example    `  | Example API (remove as needed) |
-| `GET: /example/<id>` | Example API (remove as needed) |
+| Endpoint          | Description                          |
+| :---------------- | :----------------------------------- |
+| `GET: /health`    | Health                               |
+| `POST: /validate` | Local-dev-only stub token validation |
+
+### `POST /validate` (local-dev-only stub)
+
+This endpoint is a **local-dev-only stub** used to satisfy consumer HTTP clients while real authentication
+is not yet implemented. **It is not real authentication** — there is no JWT/OAuth, no persistence and no
+permissions management — and it **must not be relied on in any deployed environment**.
+
+It always returns `200` with a fixed identity, regardless of any `Authorization` header supplied (missing,
+garbage or a well-formed `Bearer` token all behave the same):
+
+```json
+{
+  "actorId": "local-stub",
+  "permissions": ["reference-data.read", "reference-data.write"]
+}
+```
 
 ## Development helpers
-
-### MongoDB Locks
-
-If you require a write lock for Mongo you can acquire it via `server.locker` or `request.locker`:
-
-```javascript
-async function doStuff(server) {
-  const lock = await server.locker.lock('unique-resource-name')
-
-  if (!lock) {
-    // Lock unavailable
-    return
-  }
-
-  try {
-    // do stuff
-  } finally {
-    await lock.free()
-  }
-}
-```
-
-Keep it small and atomic.
-
-You may use **using** for the lock resource management.
-Note test coverage reports do not like that syntax.
-
-```javascript
-async function doStuff(server) {
-  await using lock = await server.locker.lock('unique-resource-name')
-
-  if (!lock) {
-    // Lock unavailable
-    return
-  }
-
-  // do stuff
-
-  // lock automatically released
-}
-```
-
-Helper methods are also available in `/src/helpers/mongo-lock.js`.
 
 ### Proxy
 
@@ -197,7 +168,6 @@ A local environment with:
 
 - Floci for AWS services (S3, SQS, SNS etc)
 - Redis
-- MongoDB
 - This service.
 - A commented out frontend example.
 
@@ -206,7 +176,6 @@ docker compose up --build -d
 ```
 
 Mock AWS resources can be created when Floci starts up by editing the scripts in `./compose/floci/start.d/`.
-MongoDB records can also be created when Mongo starts by editing the scripts in `./compose/mongo/`.
 
 ### Dependabot
 
