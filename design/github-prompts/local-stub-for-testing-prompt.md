@@ -66,8 +66,8 @@ database, no real JWT/OAuth validation, no persistence — an in-memory token ma
 
 Once added, this must succeed:
 curl -s -X POST http://localhost:<port>/validate \
- -H "Authorization: Bearer read-token" # => 200 { "actorId": "local-reader", "permissions": ["reference-data.read"] }
+-H "Authorization: Bearer read-token" # => 200 { "actorId": "local-reader", "permissions": ["reference-data.read"] }
 
 And this must fail with 401:
 curl -s -X POST http://localhost:<port>/validate \
- -H "Authorization: Bearer not-a-real-token"
+-H "Authorization: Bearer not-a-real-token"

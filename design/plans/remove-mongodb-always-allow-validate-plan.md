@@ -7,6 +7,7 @@ Decisions confirmed: single fixed identity `{ actorId: 'local-stub', permissions
 ## Objective
 
 Zero-external-dependency local stub:
+
 1. `POST /validate` always returns `200` with the fixed identity above, for any request.
 2. Remove MongoDB integration from server bootstrap entirely (plugin, mongo-locks, config, /example route+service, related tests/test infra).
 3. Remain deployable on DEFRA CDP — keep all other CDP plugins, unauthenticated `GET /health`, secure headers, strict config validation.
